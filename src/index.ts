@@ -1,15 +1,20 @@
+import { contextOverrides, deviceContext, type AnalyticsContext, type DeviceContext } from "./context.js";
+import { SDK_VERSION } from "./version.js";
+export type { AnalyticsContext } from "./context.js";
 export type Properties = Record<string, string | number | boolean | null>;
 export type AnalyticsOptions = {
   endpoint: string;
   key: string;
   appVersion?: string;
+  context?: AnalyticsContext;
   environment?: "production" | "test";
   namespace?: string;
   flushIntervalMs?: number;
   storage?: Storage;
   fetch?: typeof fetch;
 };
-type Event = {
+type Event = DeviceContext & {
+  sdkVersion?: string;
   id: string;
   timestamp: string;
   name: string;
@@ -24,6 +29,7 @@ type Event = {
 /** Explicit event tracking. All storage is scoped to this client; nothing is sent on construction. */
 export class TotonoAnalytics {
   private queue: Event[] = [];
+  private context: AnalyticsContext;
   private customerId?: string;
   private installationId = "";
   private sessionId = "";
@@ -36,6 +42,7 @@ export class TotonoAnalytics {
   private failures = 0;
   private readonly request: typeof fetch;
   constructor(private readonly options: AnalyticsOptions) {
+    this.context = contextOverrides(options.context || {});
     if ((options.appVersion?.length || 0) > 80)
       throw Error("invalid_app_version");
     const url = new URL(options.endpoint);
@@ -115,12 +122,19 @@ export class TotonoAnalytics {
       environment: this.options.environment || "production",
       platform: "web",
       appVersion: this.options.appVersion || "",
+      ...deviceContext(),
+      ...this.context,
+      sdkVersion: SDK_VERSION,
       properties: { ...properties },
     };
     this.queue.push(event);
     if (this.queue.length > 1000) this.queue.shift();
     this.persist();
     if (this.queue.length >= 100) void this.flush();
+  }
+  /** Replace app overrides for future events. Pass {} to restore device defaults. */
+  setContext(context: AnalyticsContext): void {
+    this.context = contextOverrides(context);
   }
   identify(customerId: string): void {
     if (!customerId || customerId.length > 200)

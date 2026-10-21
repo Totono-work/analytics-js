@@ -1,6 +1,6 @@
 {
   "name": "@totono/analytics",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -17,7 +17,9 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "prepare": "npm run build",
-    "test": "vitest run"
+    "test": "vitest run",
+    "prebuild": "node scripts/version.mjs",
+    "pretest": "node scripts/version.mjs"
   },
   "sideEffects": false,
   "description": "Explicit, privacy-conscious product analytics for websites using Totono.",

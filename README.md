@@ -29,6 +29,28 @@ Add the website's exact origin to the project's allowed origins. The client uses
 
 Production data is the default. To defer all collection until the user's preference is known, call `setOptOut(true)` before any `track` calls, then opt in when appropriate. Do not put personal information in properties. Optional `storage`, `fetch`, and `flushIntervalMs` options support host integration and testing.
 
+## Device and environment context (0.2.0)
+
+The 0.2.0 source requires a collector that accepts optional environment metadata. Deploy the compatible API before publishing/installing the new SDK; the existing 0.1.0 server rejects unknown fields. The install command above remains pinned to the existing published release until 0.2.0 is released.
+
+Each `track()` snapshots device class (`phone`, `tablet`, `desktop`, `unknown`), best-effort OS name/exposed iOS version, the SDK release version, preferred browser BCP 47 language, system light/dark preference, and available screen dimensions/scale. `appVersion` remains caller-supplied. Screen width/height use CSS pixels for the full screen, not viewport size; `screenScale` is `devicePixelRatio` (physical-pixel ratio). Missing or blocked APIs are omitted. Models are not probed, and frozen desktop/Android OS versions are omitted. User-agent results can be reduced or spoofed.
+
+Pass the active app preferences initially or update them for future events:
+
+```ts
+const analytics = new TotonoAnalytics({
+  endpoint: 'https://totono.work/api/public/analytics/v1/events',
+  key: 'YOUR_INGESTION_KEY',
+  context: { language: 'cs-CZ', colorScheme: 'dark' }
+});
+analytics.setContext({ language: 'en-US', colorScheme: 'light' });
+analytics.setContext({}); // Restore browser/system defaults.
+```
+
+`AnalyticsContext` is exported as a TypeScript type. `setContext` replaces all overrides and validates them before changing state; invalid language/appearance throws a technical error. Language tags are canonicalized. Changes do not alter queued events. Queues from older SDKs remain valid without metadata. Retries preserve the full captured payload. Opt-out prevents tracking and clears pending events. No automatic events or additional device identifiers are introduced.
+
+Country is added by the collector using its trusted load balancer's upload-time IP country estimate, if enabled. The SDK neither collects IPs nor substitutes locale region for country. Country can remain unknown and can reflect VPNs/proxies.
+
 ## Development
 
 ```sh
@@ -38,3 +60,5 @@ npm run build
 ```
 
 The GitHub CI workflow runs tests and builds on pushes and pull requests. No credentials are required for the unit tests.
+
+The build/test pre-step generates `src/version.ts` from the release version in `package.json`; update the package version and lockfile together before release.
