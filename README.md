@@ -3,7 +3,7 @@
 Install directly from the public repository:
 
 ```sh
-npm install git+https://github.com/totono-work/analytics-js.git#v0.1.0
+npm install git+https://github.com/totono-work/analytics-js.git#v0.2.0
 ```
 
 The package builds its JavaScript and TypeScript declarations during installation. npm registry publication is separate.
@@ -31,7 +31,7 @@ Production data is the default. To defer all collection until the user's prefere
 
 ## Device and environment context (0.2.0)
 
-The 0.2.0 source requires a collector that accepts optional environment metadata. Deploy the compatible API before publishing/installing the new SDK; the existing 0.1.0 server rejects unknown fields. The install command above remains pinned to the existing published release until 0.2.0 is released.
+The 0.2.0 source requires a collector that accepts optional environment metadata. Deploy the compatible API before publishing/installing the new SDK; the existing 0.1.0 server rejects unknown fields.
 
 Each `track()` snapshots device class (`phone`, `tablet`, `desktop`, `unknown`), best-effort OS name/exposed iOS version, the SDK release version, preferred browser BCP 47 language, system light/dark preference, and available screen dimensions/scale. `appVersion` remains caller-supplied. Screen width/height use CSS pixels for the full screen, not viewport size; `screenScale` is `devicePixelRatio` (physical-pixel ratio). Missing or blocked APIs are omitted. Models are not probed, and frozen desktop/Android OS versions are omitted. User-agent results can be reduced or spoofed.
 
