@@ -1,12 +1,12 @@
 # Totono Analytics for JavaScript
 
-Install directly from the public repository:
+Install from npm:
 
 ```sh
-npm install git+https://github.com/totono-work/analytics-js.git#v0.2.0
+npm install @totono/analytics
 ```
 
-The package builds its JavaScript and TypeScript declarations during installation. npm registry publication is separate.
+The npm package includes compiled JavaScript and TypeScript declarations.
 
 ```js
 import { TotonoAnalytics } from '@totono/analytics';
